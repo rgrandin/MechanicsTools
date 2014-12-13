@@ -1,0 +1,9 @@
+# vtk DataFile Version 2.0 
+Truss solution 
+ASCII 
+DATASET Unstructured_Grid 
+Points 4 float 
+0.0 0.0 0.0 
+20.0 0.0 0.0 
+0.0 25.0 0.0 
+0.0 0.0 10.0 
