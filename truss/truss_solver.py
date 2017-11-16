@@ -1,4 +1,6 @@
 #
+ # -*- coding: utf-8 -*-
+#
 # Python-Based Truss Solver
 # =============================================================
 #
@@ -10,27 +12,27 @@
 #
 #
 # PURPOSE:
-#    This code solves a truss for the internal load, strain, and stress of each member.  
-#    Being a truss, all members are assumed to be two-force members and no bending 
-#    moments are considered.  Both 2-dimensional and 3-dimensional trusses can be 
+#    This code solves a truss for the internal load, strain, and stress of each member.
+#    Being a truss, all members are assumed to be two-force members and no bending
+#    moments are considered.  Both 2-dimensional and 3-dimensional trusses can be
 #    solved with this code.
 #
 #
 # INSTRUCTIONS & NOTES:
-#    - Dictionaries are used to define the entity properties.  Names for the properties 
+#    - Dictionaries are used to define the entity properties.  Names for the properties
 #      should be self-explanatory.  Some notes:
 #       - '_flag' entries identify either displacement ('d') or force ('f') boundary
 #         conditions (BCs).  Applied forces require force BCs to be specified.
 #         Pin/roller locations require displacement BCs.  Free-to-move nodes will
 #         typically have 0-force BCs.
 #       - '_bcval' entries specify the BC value for the corresponding flag.
-#    - If solving a 2-dimensional problem, constrain node motion in the 3rd 
-#      dimension to be 0.  Allowing nodal motion in the 3rd dimension (by setting 
-#      the constraint to 0-force) will produce a matrix with  non-empty null-space.  
+#    - If solving a 2-dimensional problem, constrain node motion in the 3rd
+#      dimension to be 0.  Allowing nodal motion in the 3rd dimension (by setting
+#      the constraint to 0-force) will produce a matrix with  non-empty null-space.
 #      Displacements in the third dimension will reside in this null-space.
-#    - Input data can be saved in a python data file.  Create a module for your 
+#    - Input data can be saved in a python data file.  Create a module for your
 #      problem and define a function which returns 'nodes, members'.
-#    - Examples shown below for 2D, 3D, and file-based input.  See data file 
+#    - Examples shown below for 2D, 3D, and file-based input.  See data file
 #      'em514_problem08.py' for an example of how to write an input file.
 #
 #
@@ -41,7 +43,7 @@
 #   When using this tool for statics problems, the member loads calculated by this
 #   tool will not match the correct answer for the statics problem.  This is due
 #   to the fact that this tool considers displacements whereas displacements are
-#   not considered in a statics problem (but displacements are considered in 
+#   not considered in a statics problem (but displacements are considered in
 #   mechanics problems).  Even though the numerical results will not match when
 #   checking statics results, the discrepancy should be small enough to enable
 #   you to determine if your statics result is correct.
@@ -84,9 +86,9 @@
 #
 #    DATA FILE SAMPLE INPUT
 #
-import em514_problem08                              # Name of python file, no extension
-reload(em514_problem08)                             # Force reload to catch any updates/revisions
-nodes, members = em514_problem08.DefineInputs()     # Call input-definition function
+import em274_assess5_2017                              # Name of python file, no extension
+reload(em274_assess5_2017)                             # Force reload to catch any updates/revisions
+nodes, members = em274_assess5_2017.DefineInputs()     # Call input-definition function
 
 
 
@@ -159,7 +161,7 @@ for i in range(nnodes):
     print('  BC Type:  ( %*.*s, %*.*s, %*.*s )' % (12,12,nodes[i]['xflag'], 12,12,nodes[i]['yflag'], 12,12,nodes[i]['zflag']))
     print('  BC Value: ( % 12.3g, % 12.3g, % 12.3g )' % (nodes[i]['xbcval'], nodes[i]['ybcval'], nodes[i]['zbcval']))
     print(' ')
-    
+
 print(' ')
 print(' ')
 print(' ')
@@ -199,9 +201,9 @@ for i in range(nmem):
     members[i]['costheta_x'] = dx/members[i]['L']
     members[i]['costheta_y'] = dy/members[i]['L']
     members[i]['costheta_z'] = dz/members[i]['L']
-    
 
-# Build stiffness matrix    
+
+# Build stiffness matrix
 stiffness = numpy.zeros((3*nnodes,3*nnodes), dtype='float64')
 G = numpy.zeros((6,6), dtype='float64')
 for i in range(nmem):
@@ -219,42 +221,42 @@ for i in range(nmem):
     stiffness[tb][te]   += -k*members[i]['costheta_x']*members[i]['costheta_x']
     stiffness[tb][tem1] += -k*members[i]['costheta_x']*members[i]['costheta_y']
     stiffness[tb][tem2] += -k*members[i]['costheta_x']*members[i]['costheta_z']
-    
+
     stiffness[tbm1][tb]   += k*members[i]['costheta_y']*members[i]['costheta_x']
     stiffness[tbm1][tbm1] += k*members[i]['costheta_y']*members[i]['costheta_y']
     stiffness[tbm1][tbm2] += k*members[i]['costheta_y']*members[i]['costheta_z']
     stiffness[tbm1][te]   += -k*members[i]['costheta_y']*members[i]['costheta_x']
     stiffness[tbm1][tem1] += -k*members[i]['costheta_y']*members[i]['costheta_y']
     stiffness[tbm1][tem2] += -k*members[i]['costheta_y']*members[i]['costheta_z']
-    
+
     stiffness[tbm2][tb]   += k*members[i]['costheta_z']*members[i]['costheta_x']
     stiffness[tbm2][tbm1] += k*members[i]['costheta_z']*members[i]['costheta_y']
     stiffness[tbm2][tbm2] += k*members[i]['costheta_z']*members[i]['costheta_z']
     stiffness[tbm2][te]   += -k*members[i]['costheta_z']*members[i]['costheta_x']
     stiffness[tbm2][tem1] += -k*members[i]['costheta_z']*members[i]['costheta_y']
     stiffness[tbm2][tem2] += -k*members[i]['costheta_z']*members[i]['costheta_z']
-    
+
     stiffness[te][tb]   += -k*members[i]['costheta_x']*members[i]['costheta_x']
     stiffness[te][tbm1] += -k*members[i]['costheta_x']*members[i]['costheta_y']
     stiffness[te][tbm2] += -k*members[i]['costheta_x']*members[i]['costheta_z']
     stiffness[te][te]   += k*members[i]['costheta_x']*members[i]['costheta_x']
     stiffness[te][tem1] += k*members[i]['costheta_x']*members[i]['costheta_y']
     stiffness[te][tem2] += k*members[i]['costheta_x']*members[i]['costheta_z']
-    
+
     stiffness[tem1][tb]   += -k*members[i]['costheta_y']*members[i]['costheta_x']
     stiffness[tem1][tbm1] += -k*members[i]['costheta_y']*members[i]['costheta_y']
     stiffness[tem1][tbm2] += -k*members[i]['costheta_y']*members[i]['costheta_z']
     stiffness[tem1][te]   += k*members[i]['costheta_y']*members[i]['costheta_x']
     stiffness[tem1][tem1] += k*members[i]['costheta_y']*members[i]['costheta_y']
     stiffness[tem1][tem2] += k*members[i]['costheta_y']*members[i]['costheta_z']
-    
+
     stiffness[tem2][tb]   += -k*members[i]['costheta_z']*members[i]['costheta_x']
     stiffness[tem2][tbm1] += -k*members[i]['costheta_z']*members[i]['costheta_y']
     stiffness[tem2][tbm2] += -k*members[i]['costheta_z']*members[i]['costheta_z']
     stiffness[tem2][te]   += k*members[i]['costheta_z']*members[i]['costheta_x']
     stiffness[tem2][tem1] += k*members[i]['costheta_z']*members[i]['costheta_y']
     stiffness[tem2][tem2] += k*members[i]['costheta_z']*members[i]['costheta_z']
-    
+
 
 
 # Calculate average of main diagonal for numerical stability
@@ -274,37 +276,37 @@ for i in range(nnodes):
         for j in range(3*nnodes):
             b[j] -= stiffness[j][icol]*nodes[i]['xbcval']
         A[icol][icol] = -average
-        
+
     if(nodes[i]['xflag'] == 'f'):
         b[icol] += nodes[i]['xbcval']
         for j in range(3*nnodes):
             A[j][icol] = stiffness[j][icol]
-            
+
     icol = 3*i + 1
     if(nodes[i]['yflag'] == 'd'):
         for j in range(3*nnodes):
             b[j] -= stiffness[j][icol]*nodes[i]['ybcval']
         A[icol][icol] = -average
-        
+
     if(nodes[i]['yflag'] == 'f'):
         b[icol] += nodes[i]['ybcval']
         for j in range(3*nnodes):
             A[j][icol] = stiffness[j][icol]
-            
+
     icol = 3*i + 2
     if(nodes[i]['zflag'] == 'd'):
         for j in range(3*nnodes):
             b[j] -= stiffness[j][icol]*nodes[i]['zbcval']
         A[icol][icol] = -average
-        
+
     if(nodes[i]['zflag'] == 'f'):
         b[icol] += nodes[i]['zbcval']
         for j in range(3*nnodes):
             A[j][icol] = stiffness[j][icol]
-            
 
 
-# Solve the system            
+
+# Solve the system
 x,res,rank,singularvals = numpy.linalg.lstsq(A,b)
 
 # Calculate nodal results
@@ -312,23 +314,23 @@ for i in range(nnodes):
     if(nodes[i]['xflag'] == 'f'):
         nodes[i]['xdisp'] = x[3*i+0][0]
         nodes[i]['xforce'] = nodes[i]['xbcval']
-        
+
     if(nodes[i]['xflag'] == 'd'):
         nodes[i]['xdisp'] = nodes[i]['xbcval']
         nodes[i]['xforce'] = x[3*i+0][0]
-        
+
     if(nodes[i]['yflag'] == 'f'):
         nodes[i]['ydisp'] = x[3*i+1][0]
         nodes[i]['yforce'] = nodes[i]['ybcval']
-        
+
     if(nodes[i]['yflag'] == 'd'):
         nodes[i]['ydisp'] = nodes[i]['ybcval']
         nodes[i]['yforce'] = x[3*i+1][0]
-        
+
     if(nodes[i]['zflag'] == 'f'):
         nodes[i]['zdisp'] = x[3*i+2][0]
         nodes[i]['zforce'] = nodes[i]['zbcval']
-        
+
     if(nodes[i]['zflag'] == 'd'):
         nodes[i]['zdisp'] = nodes[i]['zbcval']
         nodes[i]['zforce'] = x[3*i+2][0]
@@ -336,7 +338,7 @@ for i in range(nnodes):
     nodes[i]['xnew'] = nodes[i]['x'] + nodes[i]['xdisp']
     nodes[i]['ynew'] = nodes[i]['y'] + nodes[i]['ydisp']
     nodes[i]['znew'] = nodes[i]['z'] + nodes[i]['zdisp']
-    
+
 
 # Calculate member results
 for i in range(nmem):
@@ -347,7 +349,7 @@ for i in range(nmem):
     members[i]['epsilon'] = (members[i]['Lnew'] - members[i]['L'])/members[i]['L']
     members[i]['stress'] = members[i]['epsilon']*members[i]['E']
     members[i]['load'] = members[i]['stress']*members[i]['A']
-    
+
 # Calculate null space of A (http://stackoverflow.com/questions/2992947/calculating-the-null-space-of-a-matrix)
 u, s, vh = numpy.linalg.svd(A)
 null_mask = (s <= 1.0e-15)
@@ -355,7 +357,7 @@ null_space = scipy.compress(null_mask, vh, axis=0)
 nullspace = scipy.transpose(null_space)
 
 
-    
+
 
 
 
@@ -376,9 +378,9 @@ print('Pin Displacements (x,y,z)')
 print('--------------------------------------')
 for i in range(nnodes):
     print('Node  % 3d: % 10.5e   % 10.5e   % 10.5e' % (i,nodes[i]['xdisp'],nodes[i]['ydisp'],nodes[i]['zdisp']))
-    
+
 print(' ')
-print(' ')    
+print(' ')
 print('Member Results')
 print('--------------------------------------')
 for i in range(nmem):
@@ -386,15 +388,15 @@ for i in range(nmem):
     print('  Internal Load: % 10.5e' % (members[i]['load']))
     print('  Axial Strain:  % 10.5e' % (members[i]['epsilon']))
     print('  Axial Stress:  % 10.5e' % (members[i]['stress']))
-    
+
     if(members[i]['stress'] > members[i]['sigma_yield']):
         if(members[i]['stress'] < members[i]['sigma_ult']):
             print('          --> YIELD STRESS SURPASSED')
         if(members[i]['stress'] > members[i]['sigma_ult']):
-            print('          --> ULTIMATE STRESS SURPASSED') 
-    
-    print(' ')  
-    
+            print('          --> ULTIMATE STRESS SURPASSED')
+
+    print(' ')
+
 print(' ')
 print(' ')
 print(' ')
@@ -403,7 +405,7 @@ print(' ')
 print('        SOLUTION QUALITY INDICATORS')
 print(' ')
 print('==============================================')
-print(' ')     
+print(' ')
 print('Rank of A matrix: %d' % (rank))
 print(' ')
 print('Size of A: %d' % (3*nnodes))
@@ -440,14 +442,14 @@ zNew = numpy.zeros((nnodes))
 for i in range(nnodes):
     xOriginal[i] = nodes[i]['x']
     xNew[i] = xOriginal[i] + nodes[i]['xdisp']*displayScaleFactor
-    
+
     yOriginal[i] = nodes[i]['y']
     yNew[i] = yOriginal[i] + nodes[i]['ydisp']*displayScaleFactor
-    
+
     zOriginal[i] = nodes[i]['z']
     zNew[i] = zOriginal[i] + nodes[i]['zdisp']*displayScaleFactor
-    
-    
+
+
 xmin1 = numpy.min(xOriginal)
 xmin2 = numpy.min(xNew)
 xmin = min(xmin1,xmin2)
@@ -540,7 +542,7 @@ if(zRange > 1.0e-5):
     plt.grid(True)
     plt.legend()
     plt.savefig('Truss_XZ_View.png')
-    
+
     plt.figure()
     plt.plot(yOriginal, zOriginal, 'ob', label='Original Position')
     plt.hold(True)
@@ -588,12 +590,12 @@ for i in range(nnodes):
 
 f.write("Cells " + str(nmem) + " " + str(nmem*3) + " \n")
 for i in range(nmem):
-    f.write("2 " + str(members[i]['start']) + " " + str(members[i]['end']) + " \n")   
-    
+    f.write("2 " + str(members[i]['start']) + " " + str(members[i]['end']) + " \n")
+
 f.write("Cell_Types " + str(nmem) + " \n")
 for i in range(nmem):
-    f.write("3 \n")     # All "cells" are of type VTK_LINE    
-    
+    f.write("3 \n")     # All "cells" are of type VTK_LINE
+
 f.close()
 
 
@@ -612,15 +614,10 @@ for i in range(nnodes):
 
 f.write("Cells " + str(nmem) + " " + str(nmem*3) + " \n")
 for i in range(nmem):
-    f.write("2 " + str(members[i]['start']) + " " + str(members[i]['end']) + " \n")   
-    
+    f.write("2 " + str(members[i]['start']) + " " + str(members[i]['end']) + " \n")
+
 f.write("Cell_Types " + str(nmem) + " \n")
 for i in range(nmem):
-    f.write("3 \n")     # All "cells" are of type VTK_LINE    
-    
+    f.write("3 \n")     # All "cells" are of type VTK_LINE
+
 f.close()
-
-
-
-
-
