@@ -56,3 +56,5 @@ target/
 *.png
 *.vtk
 *.jpg
+
+.ipynb_checkpoints
